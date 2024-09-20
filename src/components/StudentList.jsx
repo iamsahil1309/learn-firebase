@@ -1,11 +1,13 @@
-import { onValue, ref } from "firebase/database";
+import { onValue, ref, remove } from "firebase/database";
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
+import { useNavigate } from "react-router-dom";
 
 const StudentList = () => {
 
   const [studentData, setStudentData] = useState(null)
   const [loading, setloading] = useState(true)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const studentRef = ref(db, 'students')
@@ -17,6 +19,12 @@ const StudentList = () => {
       })
 
   },[])
+
+  const handleDelete = (key) => {
+    const studentRef = ref(db, 'students/'+ key)
+    remove(studentRef)
+  }
+
 
 
   if(loading) return <h1>Loading...</h1>
@@ -37,7 +45,11 @@ const StudentList = () => {
    {studentData && (
     <div>
       {Object.entries(studentData).map(([key, list]) => (
-        <p style={{color:'white'}} key={key}>{list.name}</p>
+     <div key={key} style={{display: 'flex',alignItems:'center', gap:'10px'}}>
+         <p style={{color:'white'}} >{list.name} {list.phoneNumber}</p>
+         <button onClick={() => handleDelete(key)}>Delete</button>
+         <button onClick={() => navigate('/update',  {state: [key, list]})}>Update</button>
+     </div>
       ))}
     </div>
    )}
