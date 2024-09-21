@@ -1,7 +1,8 @@
 import { onValue, ref, remove } from "firebase/database";
 import React, { useEffect, useState } from "react";
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
 import { useNavigate } from "react-router-dom";
+import { ref as storageRef, deleteObject } from "firebase/storage";
 
 const StudentList = () => {
 
@@ -22,7 +23,12 @@ const StudentList = () => {
 
   const handleDelete = (key) => {
     const studentRef = ref(db, 'students/'+ key)
-    remove(studentRef)
+    const myRef = storageRef(storage, 'images/'+key)
+
+    deleteObject(myRef).then(res => {
+      remove(studentRef)
+    })
+    
   }
 
 
@@ -46,6 +52,7 @@ const StudentList = () => {
     <div>
       {Object.entries(studentData).map(([key, list]) => (
      <div key={key} style={{display: 'flex',alignItems:'center', gap:'10px'}}>
+          <img style={{borderRadius:'50%', height:'50px', width:'50px', overflow:'hidden'}} src={list.imageUrl} />
          <p style={{color:'white'}} >{list.name} {list.phoneNumber}</p>
          <button onClick={() => handleDelete(key)}>Delete</button>
          <button onClick={() => navigate('/update',  {state: [key, list]})}>Update</button>
